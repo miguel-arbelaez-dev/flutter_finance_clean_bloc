@@ -18,24 +18,33 @@ class _TransactionFormPageState extends State<TransactionFormPage> {
   final _descriptionController = TextEditingController();
 
   TransactionType _type = TransactionType.expense;
-  String _category = 'General';
+  final String _category = 'General';
 
-  void _save() {
-    final amount = double.tryParse(_amountController.text);
-    if (amount == null) return;
+ void _save() {
+  final amount = double.tryParse(_amountController.text);
+  final description = _descriptionController.text.trim();
 
-    final transaction = FinanceTransaction(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      amount: amount,
-      type: _type,
-      category: _category,
-      date: DateTime.now(),
-      description: _descriptionController.text,
-    );
-
-    context.read<FinanceBloc>().add(AddTransactionEvent(transaction));
-    Navigator.pop(context);
+  if (amount == null || amount <= 0) {
+    return;
   }
+
+  if (description.length < 3) {
+    return;
+  }
+
+  final transaction = FinanceTransaction(
+    id: DateTime.now().millisecondsSinceEpoch.toString(),
+    amount: amount,
+    type: _type,
+    category: _category,
+    date: DateTime.now(),
+    description: description,
+  );
+
+  context.read<FinanceBloc>().add(AddTransactionEvent(transaction));
+  Navigator.pop(context);
+}
+
 
   @override
   Widget build(BuildContext context) {
