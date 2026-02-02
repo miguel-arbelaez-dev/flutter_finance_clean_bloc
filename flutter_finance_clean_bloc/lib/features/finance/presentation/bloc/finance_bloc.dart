@@ -50,6 +50,7 @@ class FinanceBloc extends Bloc<FinanceEvent, FinanceState> {
     await updateTransaction(event.transaction);
     add(LoadTransactionsEvent());
   }
+  
 
   Future<void> _onDelete(
     DeleteTransactionEvent event,

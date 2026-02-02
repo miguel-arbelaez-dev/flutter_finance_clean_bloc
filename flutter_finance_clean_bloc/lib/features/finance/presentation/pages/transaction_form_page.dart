@@ -62,7 +62,7 @@ class _TransactionFormPageState extends State<TransactionFormPage> {
             const SizedBox(height: 12),
 
             DropdownButtonFormField<TransactionType>(
-              value: _type,
+              initialValue: _type,
               items: TransactionType.values
                   .map(
                     (type) => DropdownMenuItem(

@@ -9,14 +9,15 @@ import '../widgets/balance_card.dart';
 import '../widgets/transaction_tile.dart';
 import 'transaction_form_page.dart';
 import '../../../../core/utils/enums.dart';
-
 class FinanceDashboardPage extends StatelessWidget {
   const FinanceDashboardPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Finance')),
+      appBar: AppBar(
+        title: const Text('Finance'),
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(
@@ -45,11 +46,14 @@ class FinanceDashboardPage extends StatelessWidget {
 
             return Column(
               children: [
-                BalanceCard(income: income, expense: expense),
+                BalanceCard(
+                  income: income,
+                  expense: expense,
+                ),
                 Expanded(
                   child: ListView.builder(
                     itemCount: state.transactions.length,
-                    itemBuilder: (_, index) {
+                    itemBuilder: (context, index) {
                       return TransactionTile(
                         transaction: state.transactions[index],
                       );
@@ -60,7 +64,7 @@ class FinanceDashboardPage extends StatelessWidget {
             );
           }
 
-          return const Center(child: Text('Error'));
+          return const Center(child: Text('Something went wrong'));
         },
       ),
     );
