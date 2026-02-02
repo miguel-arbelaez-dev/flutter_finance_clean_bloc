@@ -7,49 +7,69 @@ import '../bloc/finance_bloc.dart';
 import '../bloc/finance_event.dart';
 
 class TransactionFormPage extends StatefulWidget {
-  const TransactionFormPage({super.key});
+  final FinanceTransaction? transaction;
+
+  const TransactionFormPage({
+    super.key,
+    this.transaction,
+  });
 
   @override
   State<TransactionFormPage> createState() => _TransactionFormPageState();
 }
 
 class _TransactionFormPageState extends State<TransactionFormPage> {
-  final _amountController = TextEditingController();
-  final _descriptionController = TextEditingController();
+  late TextEditingController _amountController;
+  late TextEditingController _descriptionController;
+  late TransactionType _type;
+  late String _category;
 
-  TransactionType _type = TransactionType.expense;
-  final String _category = 'General';
-
- void _save() {
-  final amount = double.tryParse(_amountController.text);
-  final description = _descriptionController.text.trim();
-
-  if (amount == null || amount <= 0) {
-    return;
+  @override
+  void initState() {
+    super.initState();
+    _amountController = TextEditingController(
+      text: widget.transaction?.amount.toString() ?? '',
+    );
+    _descriptionController = TextEditingController(
+      text: widget.transaction?.description ?? '',
+    );
+    _type = widget.transaction?.type ?? TransactionType.expense;
+    _category = widget.transaction?.category ?? 'General';
   }
 
-  if (description.length < 3) {
-    return;
+  void _save() {
+    final amount = double.tryParse(_amountController.text);
+    final description = _descriptionController.text.trim();
+
+    if (amount == null || amount <= 0 || description.length < 3) return;
+
+    final transaction = FinanceTransaction(
+      id: widget.transaction?.id ??
+          DateTime.now().millisecondsSinceEpoch.toString(),
+      amount: amount,
+      type: _type,
+      category: _category,
+      date: widget.transaction?.date ?? DateTime.now(),
+      description: description,
+    );
+
+    context.read<FinanceBloc>().add(
+          widget.transaction == null
+              ? AddTransactionEvent(transaction)
+              : UpdateTransactionEvent(transaction),
+        );
+
+    Navigator.pop(context);
   }
-
-  final transaction = FinanceTransaction(
-    id: DateTime.now().millisecondsSinceEpoch.toString(),
-    amount: amount,
-    type: _type,
-    category: _category,
-    date: DateTime.now(),
-    description: description,
-  );
-
-  context.read<FinanceBloc>().add(AddTransactionEvent(transaction));
-  Navigator.pop(context);
-}
-
 
   @override
   Widget build(BuildContext context) {
+    final isEdit = widget.transaction != null;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('New Transaction')),
+      appBar: AppBar(
+        title: Text(isEdit ? 'Edit Transaction' : 'New Transaction'),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -60,9 +80,8 @@ class _TransactionFormPageState extends State<TransactionFormPage> {
               decoration: const InputDecoration(labelText: 'Amount'),
             ),
             const SizedBox(height: 12),
-
             DropdownButtonFormField<TransactionType>(
-              initialValue: _type,
+              value: _type,
               items: TransactionType.values
                   .map(
                     (type) => DropdownMenuItem(
@@ -76,19 +95,15 @@ class _TransactionFormPageState extends State<TransactionFormPage> {
               },
               decoration: const InputDecoration(labelText: 'Type'),
             ),
-
             const SizedBox(height: 12),
-
             TextField(
               controller: _descriptionController,
               decoration: const InputDecoration(labelText: 'Description'),
             ),
-
             const Spacer(),
-
             ElevatedButton(
               onPressed: _save,
-              child: const Text('Save'),
+              child: Text(isEdit ? 'Update' : 'Save'),
             ),
           ],
         ),
